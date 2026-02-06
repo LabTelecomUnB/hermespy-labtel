@@ -13,6 +13,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(BUILD_SHARED_LIBS TRUE)
 endif()
 
+# AFF3CT is optional: on Windows the linker limit (LNK1189, 65535 objects) is often exceeded.
+# Set HERMESPY_BUILD_AFF3CT=ON to attempt building it anyway.
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(_aff3ct_default OFF)
+else()
+    set(_aff3ct_default ON)
+endif()
+option(HERMESPY_BUILD_AFF3CT "Build AFF3CT FEC C++ bindings" ${_aff3ct_default})
+
+if(HERMESPY_BUILD_AFF3CT)
 # Configure aff3ct to only build the shared library
 set(AFF3CT_COMPILE_EXE OFF CACHE INTERNAL "Disable executable target" FORCE)
 set(AFF3CT_COMPILE_STATIC_LIB OFF CACHE INTERNAL "Disable static library target" FORCE)
@@ -42,6 +52,7 @@ install(TARGETS aff3ct-shared-lib COMPONENT PythonModule)
 add_subdirectory(hermespy/fec/aff3ct)
 set_target_properties(ldpc polar rs rsc turbo bch PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE INSTALL_RPATH "$ORIGIN")
 install(TARGETS aff3ct-shared-lib ldpc polar rs rsc turbo bch DESTINATION ${SKBUILD_PROJECT_NAME}/fec/aff3ct/ COMPONENT PythonModule)
+endif()
 
 # Configure the raytracing build
 # add_subdirectory(submodules/raytracing)
